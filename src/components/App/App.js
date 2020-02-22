@@ -1,10 +1,8 @@
 import React from 'react';
-import './App.css';
-import Container from '@material-ui/core/Container';
-import {UploadField} from "./UploadField/UploadField";
+import {UploadField} from "../UploadField/UploadField";
+import {Container} from "./Styles";
 
 function App() {
-
 
 
   return (

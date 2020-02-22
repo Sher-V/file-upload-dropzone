@@ -1,16 +1,14 @@
 import React, { useRef } from "react";
-import { Box } from "@material-ui/core";
 import cloudUploadImage from "./cloud_upload-24px.svg";
 import styled from "styled-components";
+import {Container, Content, Image} from "./Styles";
 
-const Image = styled.img`
-  width: 80px;
-  height: 80px;
-`;
-
-export const Dropzone = ({ disabled, onFilesAdded }) => {
+export const Dropzone = ({ successfulUpload, disabled, onFilesAdded }) => {
   const inputRef = useRef(null);
 
+  if (successfulUpload) {
+    inputRef.current.value = null;
+  }
   const openFileDialog = () => {
     if (disabled) return;
     inputRef.current.click();
@@ -25,6 +23,7 @@ export const Dropzone = ({ disabled, onFilesAdded }) => {
   };
 
   const onInputChange = event => {
+    debugger;
     if (disabled) return;
     const files = event.target.files;
     const arrFiles = fileListToArray(files);
@@ -40,14 +39,7 @@ export const Dropzone = ({ disabled, onFilesAdded }) => {
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      borderRadius="50%"
-      bgcolor="text.disabled"
-      width={200}
-      height={200}
+    <Container
       onClick={openFileDialog}
       onDrop={onDrop}
       style={{ cursor: disabled ? "default" : "pointer" }}
@@ -59,7 +51,10 @@ export const Dropzone = ({ disabled, onFilesAdded }) => {
         ref={inputRef}
         onChange={onInputChange}
       />
-      <Image src={cloudUploadImage} />
-    </Box>
+      <Content>
+        <Image src={cloudUploadImage} />
+        <span>Upload Files</span>
+      </Content>
+    </Container>
   );
 };
