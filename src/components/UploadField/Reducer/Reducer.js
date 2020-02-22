@@ -1,3 +1,5 @@
+import produce from "immer";
+
 const SET_FILES = "SET_FILES",
   SET_UPLOAD_PROGRESS = "SET_UPLOAD_PROGRESS",
   SET_SUCCESSFUL_UPLOAD = "SET_SUCCESSFUL_UPLOAD",
@@ -15,65 +17,41 @@ export const initialState = {
   canceledFile: null
 };
 
-export const reducer = (state, action) => {
+export const reducer = produce((draft = initialState, action) => {
   switch (action.type) {
     case SET_FILES:
-      if (action.acceptedFiles)
-        return {
-          ...state,
-          files: [...state.files, ...action.acceptedFiles]
-        };
-      return {
-        ...state,
-        files: []
-      };
+      draft.files = draft.files.concat(action.acceptedFiles);
+      break;
     case CLEAR_FILES:
-      return {
-        ...state,
-        files: []
-      };
+      draft.files = [];
+      break;
     case SET_UPLOAD_PROGRESS:
-      if (action.uploadProgress)
-        return {
-          ...state,
-          uploadProgress: {
-            ...state.uploadProgress,
-            ...action.uploadProgress
-          }
-        };
-      return {
-        ...state,
-        uploadProgress: {}
+      draft.uploadProgress = {
+        ...draft.uploadProgress,
+        ...action.uploadProgress
       };
+      break;
     case CLEAR_UPLOAD_PROGRESS:
-      return {
-        ...state,
-        uploadProgress: []
-      };
+      draft.uploadProgress = {};
+      break;
     case SET_SUCCESSFUL_UPLOAD:
-      return {
-        ...state,
-        successfulUpload: action.successfulUpload
-      };
+      draft.successfulUpload = action.successfulUpload;
+      break;
     case SET_UPLOAD_STATUS:
-      return {
-        ...state,
-        uploadStatus: action.uploadStatus
-      };
+      draft.uploadStatus = action.uploadStatus;
+      break;
     case SET_REMOVED_FILE:
-      return {
-        ...state,
-        files: state.files.filter(file => file.name !== action.filename)
-      };
+      const index = draft.files.findIndex(
+        file => file.name === action.filename
+      );
+      draft.files.splice(index, 1);
+      break;
     case SET_CANCELED_FILE:
-      return {
-        ...state,
-        canceledFile: action.filename
-      };
-    default:
-      return state;
+      draft.canceledFile = action.filename;
+      break;
+    // no default
   }
-};
+});
 
 export const setFiles = acceptedFiles => ({ type: SET_FILES, acceptedFiles });
 
