@@ -70,6 +70,8 @@ export const reducer = (state, action) => {
         ...state,
         canceledFile: action.filename
       };
+    default:
+      return state;
   }
 };
 

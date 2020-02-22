@@ -1,7 +1,7 @@
-import {Image, Progress, ProgressContainer, Result, Wrapper} from "./Styles";
+import { Image, Progress, ProgressContainer, Wrapper } from "./Styles";
 import React from "react";
-import doneImg from "../../assets/check_circle_outline-24px.svg";
-import failedImg from "../../assets/highlight_off-24px.svg";
+import doneImg from "../assets/check_circle_outline-24px.svg";
+import failedImg from "../assets/highlight_off-24px.svg";
 
 export const ProgressBar = ({ progress }) => {
   let imageSrc;

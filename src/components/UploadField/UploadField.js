@@ -1,15 +1,7 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef } from "react";
 import { Dropzone } from "./Dropzone/Dropzone";
 import * as axios from "axios";
-import {
-  Button,
-  Buttons,
-  ClearButton,
-  Container,
-  Content,
-  File,
-  Row
-} from "./Styles";
+import { Button, Buttons, Container, Content } from "./Styles";
 import { ProgressBar } from "./ProgressBar/ProgressBar";
 import {
   initialState,
@@ -20,11 +12,10 @@ import {
   setUploadStatus,
   setUploadProgress,
   setRemovedFile,
-  clearFiles,
   clearUploadProgress,
   setStateToInitial
 } from "./Reducer/Reducer";
-import clearButton from "../assets/clear-24px.svg";
+import clearButton from "./assets/clear-24px.svg";
 import { Files } from "./Files/Files";
 
 export const UploadField = () => {
@@ -40,17 +31,13 @@ export const UploadField = () => {
         )
       ].cancel();
     }
-
-    // cancel all promises on unmount
-    return () => {
-      cancelablePromises.current.forEach(p => p.cancel());
-      cancelablePromises.current = [];
-    };
   }, [state.canceledFile]);
 
-  const onFilesAdded = acceptedFiles => {
-    dispatch(setFiles(acceptedFiles));
-  };
+  const onFilesAdded = acceptedFiles => dispatch(setFiles(acceptedFiles));
+
+  const removeFile = file => dispatch(setRemovedFile(file.name));
+
+  const cancelUpload = file => dispatch(setCanceledFile(file.name));
 
   const uploadFiles = async () => {
     dispatch(clearUploadProgress());
@@ -160,14 +147,6 @@ export const UploadField = () => {
         Upload
       </Button>
     );
-  };
-
-  const removeFile = file => {
-    dispatch(setRemovedFile(file.name));
-  };
-
-  const cancelUpload = file => {
-    dispatch(setCanceledFile(file.name));
   };
 
   return (

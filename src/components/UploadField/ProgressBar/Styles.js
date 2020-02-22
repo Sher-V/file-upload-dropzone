@@ -10,7 +10,7 @@ export const Wrapper = styled.div`
 export const ProgressContainer = styled.div`
   display: flex;
   height: 8px;
-  width: 100%;
+  width: calc(100% - 54px);
   background-color: ${props =>
     (props.progress &&
       (props.progress === "canceled" || props.progress === "error") &&

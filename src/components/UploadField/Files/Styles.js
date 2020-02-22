@@ -14,10 +14,8 @@ export const File = styled.div`
   height: 35px;
 `;
 
-
 export const Row = styled.div`
   display: flex;
   margin-bottom: 10px;
+  height: 24px;
 `;
-
-

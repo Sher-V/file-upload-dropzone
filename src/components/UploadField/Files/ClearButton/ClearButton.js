@@ -1,4 +1,4 @@
-import clearButton from "../../../assets/clear-24px.svg";
+import clearButton from "../../assets/clear-24px.svg";
 import { ClearBtn } from "./Styles";
 import React from "react";
 

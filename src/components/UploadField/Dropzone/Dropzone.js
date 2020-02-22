@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
-import cloudUploadImage from "./cloud_upload-24px.svg";
-import styled from "styled-components";
-import {Container, Content, Image} from "./Styles";
+import cloudUploadImage from "../assets/cloud_upload-24px.svg";
+import { Container, Content, Image } from "./Styles";
 
 export const Dropzone = ({ successfulUpload, disabled, onFilesAdded }) => {
   const inputRef = useRef(null);
