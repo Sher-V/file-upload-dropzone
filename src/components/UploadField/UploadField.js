@@ -1,16 +1,34 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import { Dropzone } from "./Dropzone/Dropzone";
 import * as axios from "axios";
-import {Button, Buttons, Container, Content, File, Files} from "./Styles";
+import {
+  Button,
+  Buttons,
+  ClearButton,
+  Container,
+  Content,
+  File,
+  Row
+} from "./Styles";
 import { ProgressBar } from "./ProgressBar/ProgressBar";
+import {
+  initialState,
+  reducer,
+  setCanceledFile,
+  setFiles,
+  setSuccessfulUpload,
+  setUploadStatus,
+  setUploadProgress,
+  setRemovedFile,
+  clearFiles,
+  clearUploadProgress,
+  setStateToInitial
+} from "./Reducer/Reducer";
+import clearButton from "../assets/clear-24px.svg";
+import { Files } from "./Files/Files";
 
 export const UploadField = () => {
-  const [files, setFiles] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState({});
-  const [successfulUpload, setSuccessfulUpload] = useState(false);
-  const [uploadingStatus, setUploadingStatus] = useState(false);
-
-  const [canceledFile, setCanceledFile] = useState(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const cancelablePromises = useRef();
 
   useEffect(() => {
@@ -18,28 +36,34 @@ export const UploadField = () => {
     if (cancelablePromises.current.length) {
       cancelablePromises.current[
         cancelablePromises.current.findIndex(
-          file => file.filename === canceledFile
+          file => file.filename === state.canceledFile
         )
       ].cancel();
     }
-  }, [canceledFile]);
+
+    // cancel all promises on unmount
+    return () => {
+      cancelablePromises.current.forEach(p => p.cancel());
+      cancelablePromises.current = [];
+    };
+  }, [state.canceledFile]);
 
   const onFilesAdded = acceptedFiles => {
-    setFiles(prevFiles => [...prevFiles, ...acceptedFiles]);
+    dispatch(setFiles(acceptedFiles));
   };
 
   const uploadFiles = async () => {
-    setUploadProgress({});
-    setUploadingStatus(true);
-    const promises = [];
-    files.forEach(file => {
-      const promise = sendRequest(file);
-      promises.push(promise.promise);
-      cancelablePromises.current.push(promise);
-    });
+    dispatch(clearUploadProgress());
+    dispatch(setUploadStatus(true));
+    state.files.forEach(file =>
+      cancelablePromises.current.push(sendRequest(file))
+    );
+    const promises = Object.values(cancelablePromises.current).map(
+      cancelablePromise => cancelablePromise.promise
+    );
     await Promise.all(promises);
-    setSuccessfulUpload(true);
-    setUploadingStatus(false);
+    dispatch(setSuccessfulUpload(true));
+    dispatch(setUploadStatus(false));
   };
 
   const sendRequest = file => {
@@ -48,6 +72,7 @@ export const UploadField = () => {
 
     const CancelToken = axios.CancelToken;
     let cancel;
+
     const promise = axios
       .post("http://localhost:8000/upload", formData, {
         onUploadProgress: event => {
@@ -55,32 +80,48 @@ export const UploadField = () => {
             (event.loaded * 100) / event.total
           );
           if (percentCompleted === 100)
-            setUploadProgress(prevState => ({
-              ...prevState,
-              ...{
+            dispatch(
+              setUploadProgress({
                 [file.name]: {
                   state: "done",
                   percentage: 100
                 }
-              }
-            }));
+              })
+            );
           else
-            setUploadProgress(prevState => ({
-              ...prevState,
-              ...{
+            dispatch(
+              setUploadProgress({
                 [file.name]: {
                   state: "pending",
                   percentage: percentCompleted
                 }
-              }
-            }));
+              })
+            );
         },
         cancelToken: new CancelToken(c => {
           cancel = c;
         })
       })
       .catch(err => {
-        if (axios.isCancel(err)) console.log("Request canceled");
+        if (axios.isCancel(err))
+          dispatch(
+            setUploadProgress({
+              [file.name]: {
+                state: "canceled",
+                percentage: 0
+              }
+            })
+          );
+        else {
+          dispatch(
+            setUploadProgress({
+              [file.name]: {
+                state: "error",
+                percentage: 0
+              }
+            })
+          );
+        }
       });
 
     return {
@@ -91,67 +132,63 @@ export const UploadField = () => {
   };
 
   const renderProgressBar = file => {
-    const progress = uploadProgress[file.name];
-    if (uploadingStatus || successfulUpload) {
-      return (
-        <div>
-          <ProgressBar progress={progress ? progress.percentage : 0} />
-        </div>
-      );
+    const progress = state.uploadProgress[file.name];
+    if (state.uploadStatus || state.successfulUpload) {
+      return <ProgressBar progress={progress} />;
     }
   };
 
   const renderButtons = () => {
-    if (successfulUpload) {
+    if (state.successfulUpload) {
       return (
         <Button
           onClick={() => {
-            setFiles([]);
-            setSuccessfulUpload(false);
-            setCanceledFile(null);
-            cancelablePromises.current = null;
+            setStateToInitial(dispatch);
+            cancelablePromises.current = [];
           }}
         >
           Clear
         </Button>
       );
-    } else {
-      return (
-        <Button
-          disabled={!files.length || uploadingStatus}
-          onClick={uploadFiles}
-        >
-          Upload
-        </Button>
-      );
     }
+
+    return (
+      <Button
+        disabled={!state.files.length || state.uploadStatus}
+        onClick={uploadFiles}
+      >
+        Upload
+      </Button>
+    );
+  };
+
+  const removeFile = file => {
+    dispatch(setRemovedFile(file.name));
   };
 
   const cancelUpload = file => {
-    setCanceledFile(file.name);
+    dispatch(setCanceledFile(file.name));
   };
 
   return (
     <Container>
       <Content>
         <Dropzone
-          successfulUpload={successfulUpload}
+          successfulUpload={state.successfulUpload}
           onFilesAdded={onFilesAdded}
-          disabled={uploadingStatus || successfulUpload}
+          disabled={state.uploadStatus || state.successfulUpload}
         />
-        <Files>
-          {files.map((file, index) => (
-            <File key={index}>
-              {file.name}
-              {renderProgressBar(file)}
-              <button onClick={() => cancelUpload(file)}>ClearButton</button>
-            </File>
-          ))}
-        </Files>
+        <Files
+          files={state.files}
+          uploadProgress={state.uploadProgress}
+          cancelUpload={cancelUpload}
+          clearButton={clearButton}
+          removeFile={removeFile}
+          renderProgressBar={renderProgressBar}
+          uploadStatus={state.uploadStatus}
+        />
       </Content>
-      <Buttons>
-        {renderButtons()}
-      </Buttons>
+      <Buttons>{renderButtons()}</Buttons>
     </Container>
   );
 };

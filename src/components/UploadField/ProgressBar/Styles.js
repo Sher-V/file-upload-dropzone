@@ -1,9 +1,21 @@
 import styled from "styled-components";
 
+export const Wrapper = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  height: 24px;
+`;
+
 export const ProgressContainer = styled.div`
-  width: 80px;
+  display: flex;
   height: 8px;
-  background-color: rgb(183, 155, 229);
+  width: 100%;
+  background-color: ${props =>
+    (props.progress &&
+      (props.progress === "canceled" || props.progress === "error") &&
+      "red") ||
+    "rgb(183, 155, 229)"};
   border-radius: 5px;
 `;
 
@@ -12,4 +24,8 @@ export const Progress = styled.div`
   border-radius: 5px;
   height: 100%;
   background-color: rgba(103, 58, 183, 1);
+`;
+
+export const Image = styled.img`
+  margin-left: 30px;
 `;

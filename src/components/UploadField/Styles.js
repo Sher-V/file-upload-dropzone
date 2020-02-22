@@ -16,18 +16,6 @@ export const Content = styled.div`
   flex-direction: row;
 `;
 
-export const Files = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-left: 80px;
-  overflow-y: auto;
-`;
-
-export const File = styled.div`
-  height: 20px;
-  margin-bottom: 20px;
-`;
-
 export const Buttons = styled.div`
   align-self: flex-end;
   width: 95px;

@@ -23,7 +23,6 @@ export const Dropzone = ({ successfulUpload, disabled, onFilesAdded }) => {
   };
 
   const onInputChange = event => {
-    debugger;
     if (disabled) return;
     const files = event.target.files;
     const arrFiles = fileListToArray(files);
