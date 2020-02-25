@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import cloudUploadImage from "../assets/cloud_upload-24px.svg";
 import { Container, Content, Image } from "./Styles";
 
 export const Dropzone = ({ successfulUpload, disabled, onFilesAdded }) => {
   const inputRef = useRef(null);
+  const [highlight, setHighlight] = useState(false);
 
   if (successfulUpload) {
     inputRef.current.value = null;
@@ -16,9 +17,21 @@ export const Dropzone = ({ successfulUpload, disabled, onFilesAdded }) => {
   const onDrop = event => {
     event.preventDefault();
     if (disabled) return;
+    setHighlight(false);
     const files = event.dataTransfer.files;
     const arrFiles = fileListToArray(files);
     onFilesAdded(arrFiles);
+  };
+
+  const onDragOver = event => {
+    event.preventDefault();
+    if (disabled) return;
+    setHighlight(true);
+  };
+
+  const onDragLeave = event => {
+    if(disabled) return;
+    setHighlight(false);
   };
 
   const onInputChange = event => {
@@ -40,7 +53,10 @@ export const Dropzone = ({ successfulUpload, disabled, onFilesAdded }) => {
     <Container
       onClick={openFileDialog}
       onDrop={onDrop}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
       style={{ cursor: disabled ? "default" : "pointer" }}
+      highlight={highlight}
     >
       <input
         type="file"

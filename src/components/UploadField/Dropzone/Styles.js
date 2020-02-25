@@ -9,6 +9,7 @@ export const Container = styled.div`
   height: 200px;
   border: 2px dashed rgba(52, 55, 61, 0.25);
   color: #ccc;
+  background-color: ${props => (props.highlight ? "rgb(188, 185, 236)" : "none")};
 `;
 
 export const Content = styled.div`
